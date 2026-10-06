@@ -19,15 +19,9 @@ void main() {
   }
 
   test('completed tasks remain completed even after their deadline', () {
-    final task = createTask(
-      dueDate: DateTime(2026, 10, 1),
-      isCompleted: true,
-    );
+    final task = createTask(dueDate: DateTime(2026, 10, 1), isCompleted: true);
 
-    expect(
-      classifyTask(task, now: referenceDate),
-      SlaStatus.completed,
-    );
+    expect(classifyTask(task, now: referenceDate), SlaStatus.completed);
   });
 
   test('incomplete tasks with a past deadline are overdue', () {

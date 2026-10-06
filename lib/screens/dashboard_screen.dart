@@ -3,65 +3,16 @@ import 'package:flutter_task_tracker/logic/sla_status.dart';
 import 'package:flutter_task_tracker/models/task.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({super.key, required this.tasks});
+
+  final List<Task> tasks;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final List<Task> _tasks = [
-    Task(
-      id: '1',
-      title: 'Design Login Screen',
-      description: 'Create a clean login and onboarding flow.',
-      assignee: 'Sarah Lee',
-      dueDate: DateTime(2026, 10, 8),
-      priority: TaskPriority.high,
-      isCompleted: false,
-      createdAt: DateTime(2026, 10, 2),
-    ),
-    Task(
-      id: '2',
-      title: 'Implement Local Storage',
-      description: 'Persist tasks safely on the device.',
-      assignee: 'David Chukwuebuka',
-      dueDate: DateTime(2026, 10, 6),
-      priority: TaskPriority.high,
-      isCompleted: false,
-      createdAt: DateTime(2026, 10, 1),
-    ),
-    Task(
-      id: '3',
-      title: 'Create Task Model',
-      description: 'Define shared task fields and types.',
-      assignee: 'John Doe',
-      dueDate: DateTime(2026, 10, 10),
-      priority: TaskPriority.medium,
-      isCompleted: true,
-      createdAt: DateTime(2026, 10, 3),
-    ),
-    Task(
-      id: '4',
-      title: 'Prepare Demo Notes',
-      description: 'Prepare team explanation for the final review.',
-      assignee: 'Emily Wang',
-      dueDate: DateTime(2026, 10, 12),
-      priority: TaskPriority.low,
-      isCompleted: false,
-      createdAt: DateTime(2026, 10, 4),
-    ),
-    Task(
-      id: '5',
-      title: 'QA Testing',
-      description: 'Check task status and the dashboard layout.',
-      assignee: 'Michael Kim',
-      dueDate: DateTime(2026, 10, 4),
-      priority: TaskPriority.medium,
-      isCompleted: false,
-      createdAt: DateTime(2026, 10, 5),
-    ),
-  ];
+  List<Task> get _tasks => widget.tasks;
 
   Map<SlaStatus, int> get _statusCounts {
     final counts = {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_task_tracker/screens/dashboard_screen.dart';
+import 'package:flutter_task_tracker/screens/main_shell.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: const Color(0xFFF4F6FB),
       ),
-      home: const DashboardScreen(),
+      home: const MainShell(),
     );
   }
 }
