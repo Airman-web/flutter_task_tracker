@@ -315,7 +315,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.18),
+                          color: color.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -341,7 +341,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 12,
               offset: const Offset(0, -2),
             ),
@@ -411,7 +411,7 @@ class _SummaryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.55),
+                  color: Colors.white.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, size: 16, color: valueColor),

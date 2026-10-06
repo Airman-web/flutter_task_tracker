@@ -23,7 +23,7 @@ class TaskListScreen extends StatelessWidget {
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: tasks.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final task = tasks[index];
           final status = classifyTask(task, now: DateTime(2026, 10, 5, 12));
@@ -86,7 +86,7 @@ class TaskListScreen extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: badgeColor.withOpacity(0.18),
+                      color: badgeColor.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(

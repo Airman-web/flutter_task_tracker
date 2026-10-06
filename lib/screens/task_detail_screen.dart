@@ -67,7 +67,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: statusBadgeColor.withOpacity(0.18),
+                          color: statusBadgeColor.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
