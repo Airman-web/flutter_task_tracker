@@ -62,7 +62,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: statusBadgeColor.withOpacity(0.18),
                           borderRadius: BorderRadius.circular(10),
@@ -92,7 +95,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             const SizedBox(height: 16),
             _DetailRow(label: 'Assigned to', value: _task.assignee),
             _DetailRow(label: 'Deadline', value: formatTaskDate(_task.dueDate)),
-            _DetailRow(label: 'Priority', value: _task.priority.name.toUpperCase()),
+            _DetailRow(
+              label: 'Priority',
+              value: _task.priority.name.toUpperCase(),
+            ),
             _DetailRow(
               label: 'Status',
               value: _task.isCompleted ? 'Completed' : 'In Progress',
@@ -149,10 +155,7 @@ class _DetailRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF5C6471),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF5C6471)),
           ),
           Text(
             value,

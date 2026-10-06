@@ -33,9 +33,7 @@ class TaskListScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => TaskDetailScreen(task: task),
-                ),
+                MaterialPageRoute(builder: (_) => TaskDetailScreen(task: task)),
               );
             },
             borderRadius: BorderRadius.circular(16),
@@ -83,7 +81,10 @@ class TaskListScreen extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: badgeColor.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(10),
@@ -106,4 +107,3 @@ class TaskListScreen extends StatelessWidget {
     );
   }
 }
-
