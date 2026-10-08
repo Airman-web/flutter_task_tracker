@@ -22,6 +22,5 @@ class DashboardMetrics {
   late final int totalTasks;
   late final int completedTasks;
 
-  double get progress =>
-      totalTasks == 0 ? 0 : completedTasks / totalTasks;
+  double get progress => totalTasks == 0 ? 0 : completedTasks / totalTasks;
 }
