@@ -23,7 +23,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final status = classifyTask(_task, now: DateTime(2026, 10, 5, 12));
+    final status = classifyTask(_task);
     final statusBadgeColor = statusColor(status);
 
     return Scaffold(
@@ -67,7 +67,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: statusBadgeColor.withOpacity(0.18),
+                          color: statusBadgeColor.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
