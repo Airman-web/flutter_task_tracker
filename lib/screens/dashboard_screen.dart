@@ -84,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
-                childAspectRatio: 1.55,
+                childAspectRatio: 1.35,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 children: [
@@ -317,27 +317,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
-            _NavItem(icon: Icons.home_rounded, active: true),
-            _NavItem(icon: Icons.list_alt_rounded),
-            _NavItem(icon: Icons.person_rounded),
-          ],
-        ),
-      ),
     );
   }
 
@@ -466,18 +445,3 @@ class _LegendRow extends StatelessWidget {
   }
 }
 
-class _NavItem extends StatelessWidget {
-  const _NavItem({required this.icon, this.active = false});
-
-  final IconData icon;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      icon,
-      color: active ? const Color(0xFF2C6EEA) : const Color(0xFF6E7788),
-      size: 28,
-    );
-  }
-}
