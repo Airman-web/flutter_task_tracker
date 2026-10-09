@@ -104,10 +104,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   }
 
   Future<void> _save() async {
-    // Runs every field's validator; shows error text and stops if any fail
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isSaving = true);
+  FocusScope.of(context).unfocus(); // hide the keyboard so errors aren't covered
+  if (!_formKey.currentState!.validate()) return;
+   setState(() => _isSaving = true);
     try {
       final task = Task(
         id: widget.task?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
