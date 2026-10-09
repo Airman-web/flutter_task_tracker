@@ -26,7 +26,7 @@ class TaskListScreen extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final task = tasks[index];
-          final status = classifyTask(task, now: DateTime(2026, 10, 5, 12));
+          final status = classifyTask(task);
           final badgeColor = statusColor(status);
 
           return InkWell(

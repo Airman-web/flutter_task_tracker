@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_task_tracker/logic/dashboard_metrics.dart';
 import 'package:flutter_task_tracker/logic/sla_status.dart';
 import 'package:flutter_task_tracker/models/task.dart';
 
@@ -14,28 +15,12 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   List<Task> get _tasks => widget.tasks;
 
-  Map<SlaStatus, int> get _statusCounts {
-    final counts = {
-      SlaStatus.onTrack: 0,
-      SlaStatus.atRisk: 0,
-      SlaStatus.overdue: 0,
-      SlaStatus.completed: 0,
-    };
-
-    for (final task in _tasks) {
-      final status = classifyTask(task, now: DateTime(2026, 10, 5, 12));
-      counts[status] = (counts[status] ?? 0) + 1;
-    }
-
-    return counts;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final statusCounts = _statusCounts;
-    final totalTasks = _tasks.length;
-    final completedTasks = statusCounts[SlaStatus.completed] ?? 0;
-    final progressValue = totalTasks == 0 ? 0.0 : completedTasks / totalTasks;
+    final metrics = DashboardMetrics.fromTasks(_tasks);
+    final statusCounts = metrics.statusCounts;
+    final totalTasks = metrics.totalTasks;
+    final progressValue = metrics.progress;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
@@ -99,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
-                childAspectRatio: 1.55,
+                childAspectRatio: 1.05,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 children: [
@@ -256,10 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 12),
               ..._tasks.map((task) {
-                final status = classifyTask(
-                  task,
-                  now: DateTime(2026, 10, 5, 12),
-                );
+                final status = classifyTask(task);
                 final color = _statusColor(status);
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -335,27 +317,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
-            _NavItem(icon: Icons.home_rounded, active: true),
-            _NavItem(icon: Icons.list_alt_rounded),
-            _NavItem(icon: Icons.person_rounded),
-          ],
-        ),
-      ),
     );
   }
 
@@ -397,7 +358,7 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16),
@@ -406,33 +367,41 @@ class _SummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, size: 16, color: valueColor),
+                child: Icon(icon, size: 14, color: valueColor),
               ),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFF415065),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF415065),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
           ),
           const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w700,
-              color: valueColor,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                color: valueColor,
+              ),
             ),
           ),
         ],
@@ -484,18 +453,3 @@ class _LegendRow extends StatelessWidget {
   }
 }
 
-class _NavItem extends StatelessWidget {
-  const _NavItem({required this.icon, this.active = false});
-
-  final IconData icon;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      icon,
-      color: active ? const Color(0xFF2C6EEA) : const Color(0xFF6E7788),
-      size: 28,
-    );
-  }
-}
