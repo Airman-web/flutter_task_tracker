@@ -1,126 +1,109 @@
 import 'package:flutter/material.dart';
+
+import '../data/sample_tasks.dart';
+import '../logic/sla_status.dart';
 import '../models/task.dart';
-import '../services/database_helper.dart';
+import 'task_detail_screen.dart';
 
-class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({super.key});
+class TaskListScreen extends StatelessWidget {
+  const TaskListScreen({super.key, required this.tasks});
 
-  @override
-  State<TaskListScreen> createState() => _TaskListScreenState();
-}
-
-class _TaskListScreenState extends State<TaskListScreen> {
-  List<Task> _allTasks = [];
-  bool _isLoading = true;
-
-  // Which filter is selected: 'all', 'onTrack', 'atRisk', 'overdue', 'completed'
-  String _filter = 'all';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTasks();
-  }
-
-  // Pulls every task from the database and refreshes the screen
-  Future<void> _loadTasks() async {
-    setState(() => _isLoading = true);
-    final tasks = await DatabaseHelper.instance.getAllTasks();
-    // Soonest deadline first, so urgent tasks surface at the top
-    tasks.sort((a, b) => a.deadline.compareTo(b.deadline));
-    setState(() {
-      _allTasks = tasks;
-      _isLoading = false;
-    });
-  }
-
-  // Only the tasks that match the current filter
-  List<Task> get _visibleTasks {
-    if (_filter == 'all') return _allTasks;
-    return _allTasks.where((t) => t.slaStatus.name == _filter).toList();
-  }
-
-  // One color per SLA status, used on the badge
-  Color _colorForStatus(SlaStatus status) {
-    switch (status) {
-      case SlaStatus.onTrack:
-        return Colors.green;
-      case SlaStatus.atRisk:
-        return Colors.orange;
-      case SlaStatus.overdue:
-        return Colors.red;
-      case SlaStatus.completed:
-        return Colors.grey;
-    }
-  }
+  final List<Task> tasks;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6FB),
       appBar: AppBar(
-        title: const Text('Tasks'),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (value) {
-              setState(() => _filter = value);
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'all', child: Text('All')),
-              PopupMenuItem(value: 'onTrack', child: Text('On Track')),
-              PopupMenuItem(value: 'atRisk', child: Text('At Risk')),
-              PopupMenuItem(value: 'overdue', child: Text('Overdue')),
-              PopupMenuItem(value: 'completed', child: Text('Completed')),
-            ],
-          ),
-        ],
+        title: const Text('Task List'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1F2430),
+        elevation: 0,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _visibleTasks.isEmpty
-              ? const Center(child: Text('No tasks yet.'))
-              : RefreshIndicator(
-                  onRefresh: _loadTasks,
-                  child: ListView.builder(
-                    itemCount: _visibleTasks.length,
-                    itemBuilder: (context, index) {
-                      final task = _visibleTasks[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        child: ListTile(
-                          title: Text(task.title),
-                          subtitle: Text(
-                            'Assigned to ${task.assignee} | Due ${task.deadline.day}/${task.deadline.month}/${task.deadline.year}',
-                          ),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _colorForStatus(task.slaStatus),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              task.slaStatusLabel,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          // Opening Task Details gets wired in once that
-                          // screen exists and navigation is merged
-                          onTap: () {},
-                        ),
-                      );
-                    },
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: tasks.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final task = tasks[index];
+          final status = classifyTask(task, now: DateTime(2026, 10, 5, 12));
+          final badgeColor = statusColor(status);
+
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => TaskDetailScreen(task: task)),
+              );
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: const Color(0xFFE3EDF8),
+                    child: Text(
+                      initialsFromName(task.assignee),
+                      style: const TextStyle(
+                        color: Color(0xFF2B5FD9),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          task.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: Color(0xFF1F2430),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${task.assignee} • ${formatTaskDate(task.dueDate)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF667085),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: badgeColor.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      status.label,
+                      style: TextStyle(
+                        color: badgeColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

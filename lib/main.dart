@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
-import 'screens/task_list_screen.dart';
+import 'package:flutter_task_tracker/screens/main_shell.dart';
 
 void main() {
-  runApp(const TaskTrackerApp());
+  runApp(const MyApp());
 }
 
-class TaskTrackerApp extends StatelessWidget {
-  const TaskTrackerApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Task Tracker',
       debugShowCheckedModeBanner: false,
+      title: 'Project and SLA Task Tracker',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2C6EEA),
+          brightness: Brightness.light,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF4F6FB),
       ),
-      // Temporary: launches straight into the Task List so this branch
-      // can be run on its own. Person A's navigation replaces this on merge.
-      home: const TaskListScreen(),
+      home: const MainShell(),
     );
   }
 }
