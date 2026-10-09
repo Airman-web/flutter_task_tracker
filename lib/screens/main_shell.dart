@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../data/sample_tasks.dart';
+import '../models/task.dart';
+import '../services/database_helper.dart';
 import 'dashboard_screen.dart';
 import 'task_list_screen.dart';
 
@@ -14,15 +15,37 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
+  // Tasks now come from the sqflite database instead of sampleTasks
+  List<Task> _tasks = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    final tasks = await DatabaseHelper.instance.getAllTasks();
+    // The screen may have been closed while the database was loading
+    if (!mounted) return;
+    setState(() {
+      _tasks = tasks;
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screens = [
-      DashboardScreen(tasks: sampleTasks),
-      TaskListScreen(tasks: sampleTasks),
+      DashboardScreen(tasks: _tasks),
+      TaskListScreen(tasks: _tasks),
     ];
 
     return Scaffold(
-      body: IndexedStack(index: _selectedIndex, children: screens),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : IndexedStack(index: _selectedIndex, children: screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
