@@ -98,12 +98,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             style: TextStyle(color: AppColors.textMuted)),
                         TextButton(
                           onPressed: () =>
-                              ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Sign Up: ask the Project Manager to add you in Team Members.'),
-                            ),
-                          ),
+                              Navigator.pushNamed(context, Routes.signUp),
                           child: const Text('Sign Up'),
                         ),
                       ],

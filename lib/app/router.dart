@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import '../screens/main_shell.dart';
 import '../screens/placeholder_screens.dart';
 import '../screens/sign_in_screen.dart';
+import '../screens/sign_up_screen.dart';
 
 /// All route names in one place so every teammate navigates the same way.
 ///
 /// Usage:  Navigator.pushNamed(context, Routes.taskDetails, arguments: task);
 class Routes {
   static const signIn = '/';
+  static const signUp = '/sign-up';
   static const home = '/home'; // Navigation shell (bottom tabs)
 
   // Pushed on top of the shell (full screen, with back button)
@@ -22,6 +24,9 @@ class AppRouter {
     switch (settings.name) {
       case Routes.signIn:
         return _page(const SignInScreen(), settings);
+
+      case Routes.signUp:
+        return _page(const SignUpScreen(), settings);
 
       case Routes.home:
         // Optional: pass an int to open a specific tab (0 Home, 1 Tasks,
