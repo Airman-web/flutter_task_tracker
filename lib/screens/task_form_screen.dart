@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../data/sample_tasks.dart' show formatTaskDate;
 import '../data/task_repository.dart';
 import '../models/task.dart';
 import '../utils/task_validators.dart';
@@ -17,7 +18,10 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   late final TextEditingController _titleCtrl;
   late final TextEditingController _descCtrl;
   String? _assignee;
+  DateTime? _dueDate;
+  late TaskPriority _priority;
   bool _isSaving = false;
+  bool _dirty = false; // true once the user changes anything
 
   bool get _isEditing => widget.task != null;
 
@@ -41,6 +45,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     _titleCtrl = TextEditingController(text: t?.title ?? '');
     _descCtrl = TextEditingController(text: t?.description ?? '');
     _assignee = t?.assignee;
+    _dueDate = t?.dueDate;
+    _priority = t?.priority ?? TaskPriority.medium;
   }
 
   @override
@@ -48,6 +54,53 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     _titleCtrl.dispose();
     _descCtrl.dispose();
     super.dispose();
+  }
+
+  void _markDirty() {
+    // setState is required: PopScope.canPop is read during build()
+    if (!_dirty) setState(() => _dirty = true);
+  }
+
+  Future<void> _pickDate(FormFieldState<DateTime> field) async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final original = widget.task?.dueDate;
+    // When editing an already-overdue task, its old date stays selectable
+    final floor =
+        (original != null && original.isBefore(today)) ? original : today;
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? today,
+      firstDate: floor, // past dates are greyed out in the picker
+      lastDate: DateTime(now.year + 5),
+    );
+    if (picked != null) {
+      setState(() {
+        _dueDate = picked;
+        _dirty = true;
+      });
+      field.didChange(picked); // tells the FormField so its error clears
+    }
+  }
+
+  Future<bool> _confirmDiscard() async {
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Discard changes?'),
+        content: const Text('You have unsaved changes that will be lost.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Keep editing')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Discard')),
+        ],
+      ),
+    );
+    return discard ?? false;
   }
 
   Future<void> _save() async {
@@ -61,9 +114,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         title: _titleCtrl.text.trim(),
         description: _descCtrl.text.trim(),
         assignee: _assignee!,
-        // TEMP (Step 4 replaces both of these)
-        dueDate: widget.task?.dueDate ?? DateTime.now().add(const Duration(days: 7)),
-        priority: widget.task?.priority ?? TaskPriority.medium,
+        dueDate: _dueDate!, // safe: validate() already blocked a null date
+        priority: _priority,
         isCompleted: widget.task?.isCompleted ?? false,
         createdAt: widget.task?.createdAt ?? DateTime.now(),
       );
@@ -82,65 +134,114 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Edit Task' : 'New Task')),
-      body: Form(
-        key: _formKey,
-        child: ListView( // scrolls when the keyboard is open
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _titleCtrl,
-              textInputAction: TextInputAction.next,
-              maxLength: TaskValidators.titleMax,
-              decoration: const InputDecoration(
-                labelText: 'Title *',
-                prefixIcon: Icon(Icons.title),
-                border: OutlineInputBorder(),
+    return PopScope(
+      canPop: !_dirty, // back is blocked while there are unsaved changes
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final nav = Navigator.of(context);
+        if (await _confirmDiscard()) nav.pop();
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text(_isEditing ? 'Edit Task' : 'New Task')),
+        body: Form(
+          key: _formKey,
+          onChanged: _markDirty,
+          child: ListView( // scrolls when the keyboard is open
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _titleCtrl,
+                textInputAction: TextInputAction.next,
+                maxLength: TaskValidators.titleMax,
+                decoration: const InputDecoration(
+                  labelText: 'Title *',
+                  prefixIcon: Icon(Icons.title),
+                  border: OutlineInputBorder(),
+                ),
+                validator: TaskValidators.title,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
-              validator: TaskValidators.title,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _descCtrl,
-              maxLines: 4,
-              maxLength: TaskValidators.descriptionMax,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                alignLabelWithHint: true,
-                prefixIcon: Icon(Icons.notes),
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descCtrl,
+                maxLines: 4,
+                maxLength: TaskValidators.descriptionMax,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  alignLabelWithHint: true,
+                  prefixIcon: Icon(Icons.notes),
+                  border: OutlineInputBorder(),
+                ),
+                validator: TaskValidators.description,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
               ),
-              validator: TaskValidators.description,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: _assignee,
-              decoration: const InputDecoration(
-                labelText: 'Assignee *',
-                prefixIcon: Icon(Icons.person_outline),
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _assignee,
+                decoration: const InputDecoration(
+                  labelText: 'Assignee *',
+                  prefixIcon: Icon(Icons.person_outline),
+                  border: OutlineInputBorder(),
+                ),
+                items: _memberNames
+                    .map((n) => DropdownMenuItem(value: n, child: Text(n)))
+                    .toList(),
+                onChanged: (v) => setState(() => _assignee = v),
+                validator: TaskValidators.assignee,
               ),
-              items: _memberNames
-                  .map((n) => DropdownMenuItem(value: n, child: Text(n)))
-                  .toList(),
-              onChanged: (v) => setState(() => _assignee = v),
-              validator: TaskValidators.assignee,
-            ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: _isSaving ? null : _save,
-              icon: _isSaving
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.save),
-              label: Text(_isEditing ? 'Save Changes' : 'Create Task'),
-            ),
-          ],
+              const SizedBox(height: 16),
+              // FormField wrapper gives the date picker validation + inline error
+              FormField<DateTime>(
+                initialValue: _dueDate,
+                validator: (v) => TaskValidators.deadline(
+                  v,
+                  originalDeadline: widget.task?.dueDate,
+                ),
+                builder: (field) => InkWell(
+                  onTap: () => _pickDate(field),
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Deadline *',
+                      prefixIcon: const Icon(Icons.event),
+                      border: const OutlineInputBorder(),
+                      errorText: field.errorText,
+                    ),
+                    child: Text(
+                      _dueDate == null
+                          ? 'Tap to pick a date'
+                          : formatTaskDate(_dueDate!),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text('Priority', style: Theme.of(context).textTheme.labelLarge),
+              const SizedBox(height: 8),
+              SegmentedButton<TaskPriority>(
+                segments: const [
+                  ButtonSegment(value: TaskPriority.low, label: Text('Low')),
+                  ButtonSegment(value: TaskPriority.medium, label: Text('Medium')),
+                  ButtonSegment(value: TaskPriority.high, label: Text('High')),
+                ],
+                selected: {_priority},
+                onSelectionChanged: (s) => setState(() {
+                  _priority = s.first;
+                  _dirty = true;
+                }),
+              ),
+              const SizedBox(height: 32),
+              FilledButton.icon(
+                onPressed: _isSaving ? null : _save,
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.save),
+                label: Text(_isEditing ? 'Save Changes' : 'Create Task'),
+              ),
+            ],
+          ),
         ),
       ),
     );
