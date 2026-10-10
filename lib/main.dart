@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_task_tracker/screens/main_shell.dart';
+import 'app/router.dart';
+import 'screens/sign_in_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +22,9 @@ class MyApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: const Color(0xFFF4F6FB),
       ),
-      home: const MainShell(),
+      home: const SignInScreen(),
+      onGenerateRoute: AppRouter.generate,
     );
   }
 }
+
