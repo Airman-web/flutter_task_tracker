@@ -1,45 +1,62 @@
 import 'package:flutter/material.dart';
-
-import '../models/task.dart';
-import '../services/database_helper.dart';
+import 'team_members_screen.dart';
+import 'profile_screen.dart';
+import '../data/task_repository.dart';
 import 'dashboard_screen.dart';
 import 'task_list_screen.dart';
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  final int initialIndex;
+
+  const MainShell({
+    super.key,
+    this.initialIndex = 0,
+  });
 
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
-  int _selectedIndex = 0;
+  int get _initialIndex => widget.initialIndex.clamp(0, 3);
 
-  // Tasks now come from the sqflite database instead of sampleTasks
-  List<Task> _tasks = [];
+  late int _selectedIndex = _initialIndex;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    // Rebuild whenever a task is added, edited or deleted
+    TaskRepository.instance.addListener(_onTasksChanged);
     _loadTasks();
   }
 
+  @override
+  void dispose() {
+    TaskRepository.instance.removeListener(_onTasksChanged);
+    super.dispose();
+  }
+
+  void _onTasksChanged() {
+    if (mounted) setState(() {});
+  }
+
   Future<void> _loadTasks() async {
-    final tasks = await DatabaseHelper.instance.getAllTasks();
-    // The screen may have been closed while the database was loading
-    if (!mounted) return;
-    setState(() {
-      _tasks = tasks;
-      _isLoading = false;
-    });
+    try {
+      await TaskRepository.instance.load();
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final tasks = TaskRepository.instance.tasks;
     final screens = [
-      DashboardScreen(tasks: _tasks),
-      TaskListScreen(tasks: _tasks),
+      DashboardScreen(tasks: tasks),
+      TaskListScreen(tasks: tasks),
+      const TeamMembersScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -59,6 +76,9 @@ class _MainShellState extends State<MainShell> {
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
+          type: BottomNavigationBarType.fixed,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
           onTap: (value) {
             setState(() {
               _selectedIndex = value;
@@ -74,6 +94,14 @@ class _MainShellState extends State<MainShell> {
             BottomNavigationBarItem(
               icon: Icon(Icons.list_alt_rounded),
               label: 'Tasks',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.group),
+              label: 'Team',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
             ),
           ],
         ),

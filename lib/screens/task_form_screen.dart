@@ -3,6 +3,7 @@ import '../data/sample_tasks.dart' show formatTaskDate;
 import '../data/task_repository.dart';
 import '../models/task.dart';
 import '../utils/task_validators.dart';
+import '../data/team_repository.dart';
 
 class TaskFormScreen extends StatefulWidget {
   const TaskFormScreen({super.key, this.task}); // null = create, non-null = edit
@@ -25,18 +26,21 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
   bool get _isEditing => widget.task != null;
 
-  // TEMP: replace with TeamRepository.instance.members after merge
-  static const _stubMembers = [
-    'John Doe', 'Sarah Lee', 'Michael Kim', 'Emily Wong', 'David Liu',
-  ];
-
+// Returns a list of all team member names, plus the current assignee if editing an older task.
   List<String> get _memberNames {
-    final names = List<String>.of(_stubMembers);
-    final current = widget.task?.assignee;
-    // keep the existing assignee selectable even if not in the team list
-    if (current != null && !names.contains(current)) names.insert(0, current);
-    return names;
+  final names = TeamRepository.instance.members
+      .map((member) => member.name)
+      .toList();
+
+  final current = widget.task?.assignee;
+
+  // Keep the current assignee available when editing an older task.
+  if (current != null && !names.contains(current)) {
+    names.insert(0, current);
   }
+
+  return names;
+}
 
   @override
   void initState() {

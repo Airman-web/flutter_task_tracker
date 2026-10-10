@@ -1,4 +1,6 @@
 import '../models/task.dart';
+import 'package:flutter/material.dart';
+
 
 enum SlaStatus { onTrack, atRisk, overdue, completed }
 
@@ -38,3 +40,16 @@ SlaStatus classifyTask(Task task, {DateTime? now}) {
 }
 
 DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
+
+Color statusColor(SlaStatus status) {
+  switch (status) {
+    case SlaStatus.onTrack:
+      return Colors.blue;
+    case SlaStatus.atRisk:
+      return Colors.orange;
+    case SlaStatus.overdue:
+      return Colors.red;
+    case SlaStatus.completed:
+      return Colors.green;
+  }
+}

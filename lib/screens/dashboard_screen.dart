@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_task_tracker/logic/dashboard_metrics.dart';
 import 'package:flutter_task_tracker/logic/sla_status.dart';
 import 'package:flutter_task_tracker/models/task.dart';
-
+import 'package:flutter_task_tracker/data/team_repository.dart';
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, required this.tasks});
 
@@ -44,22 +44,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
+                      children: [
+                        const Text(
                           'Good morning,',
                           style: TextStyle(
                             fontSize: 15,
                             color: Color(0xFF5C6471),
                           ),
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          'John',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1F2430),
-                          ),
+                        const SizedBox(height: 4),
+                        ValueListenableBuilder(
+                          valueListenable: AppSession.currentUser,
+                          builder: (context, user, child) {
+                            return Text(
+                              user?.name ?? 'Guest',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF1F2430),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
