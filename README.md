@@ -1,38 +1,48 @@
-Project & SLA Task Tracker
-Overview
-Project & SLA Task Tracker is a Flutter application for creating and
-managing tasks while keeping track of deadlines and SLA status. It
-includes a dashboard, task management screens, team-member management,
-and sign-in/sign-up screens.
-The app is built as a frontend project and uses SQLite for local storage
-of supported task and team-member data.
-Main Features
-- Sign in and sign up: screens for entering the app and
-  registering a local user.
-- Dashboard: summary cards and an overview of task progress and
-  SLA categories.
-- Task list: view the tasks available in the app.
-- Task details: view information about a selected task and access
-  task actions.
-- Create and edit tasks: enter task information, assign a team
-  member, set a due date and priority, and update existing tasks.
-- SLA status: classify tasks as On Track, At Risk, Overdue, or
-  Completed according to the rules in the app.
-- Team members: view and manage team-member information.
-- Profile: view the profile area within the app.
-- Local persistence: SQLite (sqflite) stores supported task and
-  team-member data.
-Technology Used
-- Flutter for the user interface.
-- Dart for application logic.
-- SQLite with sqflite for local storage.
-- path to help build database file paths.
-- crypto for hashing passwords in the local sign-in/sign-up
-  flow.
-Project Structure
+# Project & SLA Task Tracker
+
+A Flutter mobile app for creating and managing tasks in a small software team. Every task gets an SLA status based on its deadline, so it is easy to see what is on track and what needs attention.
+
+Built for the Mobile Application Development course at ALU (Group30). There is no backend. All data is stored on the device with SQLite.
+
+**Demo video:** [Watch the walkthrough](https://drive.google.com/file/d/1rxU7uo5TchwqXE5m6jQiIhIgsxl5Bzp9/view?usp=sharing)
+
+## Features
+
+- **Sign in and sign up:** register a local user and sign in.
+- **Dashboard:** summary cards and a progress overview by SLA status.
+- **Task list:** see all tasks with their SLA status.
+- **Task details:** view one task and its actions.
+- **Create and edit tasks:** set a title, description, assignee, due date and priority.
+- **SLA status:** every task is On Track, At Risk, Overdue or Completed.
+- **Team members:** view and manage team members.
+- **Profile:** view the profile area.
+- **Local storage:** tasks and team members are saved with SQLite, so they are still there after the app is closed and reopened.
+
+## SLA Status
+
+The rules compare calendar dates, not the time of day. They live in `lib/logic/sla_status.dart`.
+
+| Status | Rule |
+|---|---|
+| Completed | The task is marked done, whatever the due date. |
+| Overdue | Not done, and the due date is before today. |
+| At Risk | Not done, and due today or within the next two days. |
+| On Track | Not done, and due more than two days away. |
+
+## Tech Stack
+
+- Flutter and Dart
+- SQLite through `sqflite` for local storage
+- `path` for building the database file path
+- `crypto` for hashing passwords in the local sign-in flow
+
+## Project Structure
+
+```
 lib/
 ├── app/
-│   └── router.dart
+│   ├── router.dart
+│   └── theme.dart
 ├── data/
 │   ├── sample_tasks.dart
 │   ├── task_repository.dart
@@ -52,58 +62,54 @@ lib/
 │   ├── task_form_screen.dart
 │   ├── task_list_screen.dart
 │   └── team_members_screen.dart
-└── services/
-    └── database_helper.dart
-The structure may change as the team continues development.
-Getting Started
-Requirements
-- Flutter SDK
-- Dart SDK (included with Flutter)
-- An Android emulator, iOS simulator, or supported device
-Run the app
-1. Clone the repository:
-   git clone <repository-url>
-2. Move into the project directory:
-   cd <project-folder>
-3. Install dependencies:
-   flutter pub get
-4. Check the project:
-   flutter analyze
-5. Run the app:
-   flutter run
-Replace <repository-url> and <project-folder> with the actual
-values.
-Local Data and Authentication
-The project uses a local SQLite database rather than a remote backend.
-This suits the assignment requirement to demonstrate local persistence
-without building a backend service.
-The sign-in/sign-up flow is local and should not be treated as
-production authentication. It does not replace a secure server-based
-authentication system. Test the actual registration, sign-in, and
-persistence behaviour before the demonstration.
-SLA Status
-The app uses four SLA categories:
-- On Track
-- At Risk
-- Overdue
-- Completed
-The exact conditions are defined in lib/logic/sla_status.dart. Review
-that file and explain the implemented At Risk rule during the
-demonstration. Do not assume a threshold that is not present in the
-code.
-Testing Before the Demo
-- Register a user and test sign-in with valid and invalid details.
-- Create a task and confirm it appears in the task list and dashboard.
-- Edit a task and confirm the changes appear.
-- Test task completion and deletion.
-- Check that task statuses match the SLA logic.
-- Close and reopen the app to check whether saved data remains
-  available.
-- Test form validation and error messages.
-- Run flutter analyze and address any reported issues.
-Only describe a feature as working in the demo after testing it.
-Team Contributions
-This is a group project. Each team member should document their own work
-in the contribution tracker and make meaningful commits on their
-assigned Git branch. The repository history should accurately reflect
-each member's work.
+├── services/
+│   └── database_helper.dart
+├── utils/
+│   └── task_validators.dart
+├── widgets/
+│   ├── app_drawer.dart
+│   └── member_avatar.dart
+└── main.dart
+test/
+└── sla_status_test.dart
+```
+
+## Getting Started
+
+### Requirements
+
+- Flutter SDK (Dart is included)
+- An Android emulator, an iOS simulator or a physical device
+
+Run the app on an emulator or a device. `sqflite` does not work in a web browser.
+
+### Run the app
+
+```bash
+git clone https://github.com/Airman-web/flutter_task_tracker.git
+cd flutter_task_tracker
+flutter pub get
+flutter run
+```
+
+## Local Data and Sign In
+
+The app uses a local SQLite database, not a remote server. The sign in and sign up flow is also local. Passwords are hashed with `crypto`, but this is not production authentication and does not replace a secure server-based system.
+
+## Testing
+
+```bash
+flutter analyze
+flutter test
+```
+
+`test/sla_status_test.dart` checks the SLA rules.
+
+## Team
+
+| Name | GitHub |
+|---|---|
+| David Chukwuebuka Achibiri | [@joules65](https://github.com/joules65) |
+| Bulamba Isimbi Melissa | [@Melissa24808](https://github.com/Melissa24808) |
+| Crispin Hebert Hirwa | [@Hirwavsopps](https://github.com/Hirwavsopps) |
+| Emmanuel Ayomikun Atigbi | [@Airman-web](https://github.com/Airman-web) |
